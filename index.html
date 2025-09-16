@@ -1,55 +1,66 @@
-<html>
-    <head>
-        <title>Document</title>
-        <link rel="stylesheet" href="styles.css">
-    </head>
-    <body>
-        <h1 id="abc">Document1-내용부분</h1>
-        <h2 id="def">Document2-내용부분</h2>
-        <h5>Document5</h5>
-        <h6>Document6</h6>
-    
-        <div class="atag_list">
-            <a href="https://www.naver.com/">Naver</a><br>
-            <a href="https://www.naver.com/" target="_blank">Naver-새탭에서</a><br>
-        </div>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>랜덤 명언 생성기</title>
+    <link rel="stylesheet" href="quote-styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">✨ 오늘의 명언 ✨</h1>
+            <p class="subtitle">마음에 울림을 주는 지혜의 말씀</p>
+        </header>
 
-        <div class="p_list">
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.</p><br>
-        </div>
+        <main class="quote-container">
+            <div class="quote-card" id="quoteCard">
+                <div class="quote-icon">"</div>
+                <p class="quote-text" id="quoteText">
+                    버튼을 클릭하여 오늘의 명언을 확인해보세요!
+                </p>
+                <div class="author-section">
+                    <span class="author" id="author">- 명언 생성기 -</span>
+                </div>
+            </div>
 
-        <div class="content1">
-            <ol id="TODO1">
-                <li>TODO1</li>
-                <li>TODO2</li>
-                <li>TODO3</li>
-            </ol>
-        </div>
+            <div class="controls">
+                <button class="generate-btn" id="generateBtn" onclick="generateQuote()">
+                    <span class="btn-icon">🎲</span>
+                    새로운 명언
+                </button>
+                
+                <button class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()" disabled>
+                    <span class="btn-icon">❤️</span>
+                    즐겨찾기
+                </button>
+                
+                <button class="share-btn" id="shareBtn" onclick="shareQuote()" disabled>
+                    <span class="btn-icon">📤</span>
+                    공유하기
+                </button>
+            </div>
 
-        <div class="content1">
-            <ul id="TODO2">
-                <li>TODO1-1</li>
-                <li>TODO2-2</li>
-                <li>TODO3-3</li>
-            </ul>
-        </div>
-        
-        <img src="https://images.unsplash.com/photo-1757877942839-e3ed20a6c8c4?q=80&w=765&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" width="400" height="400"><br>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalQuotes">0</span>
+                    <span class="stat-label">확인한 명언</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="favoriteCount">0</span>
+                    <span class="stat-label">즐겨찾기</span>
+                </div>
+            </div>
+        </main>
 
-        <div class="content1">
-            <h1 class="content3">Document1-내용부분</h1>
+        <div class="favorites-section" id="favoritesSection">
+            <h3>💖 즐겨찾기한 명언들</h3>
+            <div class="favorites-list" id="favoritesList">
+                <p class="no-favorites">아직 즐겨찾기한 명언이 없습니다.</p>
+            </div>
         </div>
+    </div>
 
-        <div class="js-demo">
-            <h3>자바스크립트 데모</h3>
-            <button id="colorBtn" onclick="changeBackgroundColor()">배경색 변경</button>
-            <button id="messageBtn" onclick="showMessage()">메시지 표시</button>
-            <button id="resetBtn" onclick="resetPage()">초기화</button>
-            <p id="messageDisplay"></p>
-        </div>
-
-        <script src="script.js"></script>
-    </body>
+    <script src="quote-script.js"></script>
+</body>
 </html>
-
-
