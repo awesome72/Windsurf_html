@@ -356,6 +356,153 @@ header {
     }
 }
 
+/* API 상태 및 설정 */
+.api-status-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+    flex-wrap: wrap;
+}
+
+.api-status {
+    font-size: 0.9em;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.api-status.connected {
+    background: linear-gradient(45deg, #27ae60, #2ecc71);
+    color: white;
+}
+
+.api-status.disconnected {
+    background: linear-gradient(45deg, #f39c12, #e67e22);
+    color: white;
+}
+
+.api-settings-btn {
+    background: linear-gradient(45deg, #9b59b6, #8e44ad);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.api-settings-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(155, 89, 182, 0.4);
+}
+
+/* API 키 모달 */
+.api-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.api-modal.show {
+    opacity: 1;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.modal-content h3 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+    text-align: center;
+}
+
+.api-input-group {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.api-input-group input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 1em;
+}
+
+.api-input-group button {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.api-help {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+.api-help ol {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.api-help code {
+    background: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.close-modal {
+    width: 100%;
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+/* 로딩 상태 */
+.generate-btn.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
 /* 스크롤바 스타일 */
 .favorites-list::-webkit-scrollbar {
     width: 8px;

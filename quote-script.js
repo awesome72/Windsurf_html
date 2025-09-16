@@ -1,5 +1,5 @@
-// 명언 데이터베이스
-const quotes = [
+// 기본 명언 데이터베이스 (백업용)
+const fallbackQuotes = [
     {
         text: "성공은 준비된 기회와 만나는 것이다.",
         author: "루이 파스퇴르"
@@ -19,68 +19,104 @@ const quotes = [
     {
         text: "오늘 할 수 있는 일을 내일로 미루지 마라.",
         author: "벤자민 프랭클린"
-    },
-    {
-        text: "인생은 10%는 무슨 일이 일어나는가 하는 것이고, 90%는 일어난 일에 어떻게 반응하느냐 하는 것이다.",
-        author: "찰스 스윈돌"
-    },
-    {
-        text: "변화를 원한다면 먼저 자신이 변해야 한다.",
-        author: "마하트마 간디"
-    },
-    {
-        text: "시작이 반이다.",
-        author: "아리스토텔레스"
-    },
-    {
-        text: "지식에 투자하는 것이 최고의 이자를 가져다준다.",
-        author: "벤자민 프랭클린"
-    },
-    {
-        text: "당신이 할 수 있다고 믿든 할 수 없다고 믿든, 당신이 옳다.",
-        author: "헨리 포드"
-    },
-    {
-        text: "성공의 비밀은 단 한 가지, 절대 포기하지 않는 것이다.",
-        author: "윈스턴 처칠"
-    },
-    {
-        text: "배움에는 왕도가 없다.",
-        author: "유클리드"
-    },
-    {
-        text: "천 리 길도 한 걸음부터.",
-        author: "노자"
-    },
-    {
-        text: "기회는 준비된 자에게 온다.",
-        author: "루이 파스퇴르"
-    },
-    {
-        text: "어제는 역사이고, 내일은 미스터리다. 하지만 오늘은 선물이다.",
-        author: "엘리너 루스벨트"
-    },
-    {
-        text: "위대한 일을 하려면 자신이 하는 일을 사랑해야 한다.",
-        author: "스티브 잡스"
-    },
-    {
-        text: "불가능이란 단지 의견일 뿐이다.",
-        author: "파울로 코엘료"
-    },
-    {
-        text: "행동은 모든 성공의 기초적 열쇠다.",
-        author: "파블로 피카소"
-    },
-    {
-        text: "삶이 있는 한 희망은 있다.",
-        author: "키케로"
-    },
-    {
-        text: "성공하는 사람은 실패에서 배우고, 실패하는 사람은 성공에서 배운다.",
-        author: "로버트 키요사키"
     }
 ];
+
+// ChatGPT API 클래스
+class QuoteGenerator {
+    constructor() {
+        this.isLoading = false;
+        this.lastGeneratedQuote = null;
+    }
+
+    // ChatGPT API로 명언 생성
+    async generateQuoteFromAPI() {
+        if (!apiConfig.isAPIKeyValid()) {
+            throw new Error('유효한 API 키가 필요합니다.');
+        }
+
+        this.isLoading = true;
+        updateLoadingState(true);
+
+        try {
+            const response = await fetch(apiConfig.baseURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiConfig.apiKey}`
+                },
+                body: JSON.stringify({
+                    model: apiConfig.model,
+                    messages: [
+                        {
+                            role: 'system',
+                            content: '당신은 영감을 주는 명언을 생성하는 전문가입니다. 한국어로 짧고 임팩트 있는 명언과 그 작가를 제공해주세요.'
+                        },
+                        {
+                            role: 'user',
+                            content: '새로운 영감을 주는 명언 하나와 그 작가를 JSON 형식으로 제공해주세요. 형식: {"text": "명언 내용", "author": "작가명"}'
+                        }
+                    ],
+                    max_tokens: apiConfig.maxTokens,
+                    temperature: apiConfig.temperature
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`API 호출 실패: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            const content = data.choices[0].message.content;
+            
+            // JSON 파싱 시도
+            try {
+                const quoteData = JSON.parse(content);
+                this.lastGeneratedQuote = quoteData;
+                return quoteData;
+            } catch (parseError) {
+                // JSON 파싱 실패시 텍스트에서 추출 시도
+                return this.parseQuoteFromText(content);
+            }
+
+        } catch (error) {
+            console.error('API 호출 오류:', error);
+            throw error;
+        } finally {
+            this.isLoading = false;
+            updateLoadingState(false);
+        }
+    }
+
+    // 텍스트에서 명언 추출
+    parseQuoteFromText(text) {
+        const lines = text.split('\n').filter(line => line.trim());
+        let quoteText = '';
+        let author = '';
+
+        for (const line of lines) {
+            if (line.includes('"') || line.includes('「')) {
+                quoteText = line.replace(/["""「」]/g, '').trim();
+            } else if (line.includes('-') || line.includes('by') || line.includes('작가')) {
+                author = line.replace(/[-by작가:]/g, '').trim();
+            }
+        }
+
+        return {
+            text: quoteText || '새로운 영감을 찾아보세요.',
+            author: author || 'ChatGPT'
+        };
+    }
+
+    // 백업 명언 반환
+    getFallbackQuote() {
+        const randomIndex = Math.floor(Math.random() * fallbackQuotes.length);
+        return fallbackQuotes[randomIndex];
+    }
+}
+
+// 전역 인스턴스
+const quoteGenerator = new QuoteGenerator();
 
 // 전역 변수
 let currentQuote = null;
@@ -89,44 +125,72 @@ let favorites = JSON.parse(localStorage.getItem('favoriteQuotes')) || [];
 let usedQuotes = [];
 
 // 페이지 로드 시 초기화
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     updateStats();
     displayFavorites();
+    await initializeAPI();
 });
 
-// 랜덤 명언 생성
-function generateQuote() {
-    // 모든 명언을 다 봤으면 초기화
-    if (usedQuotes.length >= quotes.length) {
-        usedQuotes = [];
+// API 초기화
+async function initializeAPI() {
+    // GitHub에서 API 키 로드 시도
+    const githubSuccess = await apiConfig.loadAPIKeyFromGitHub();
+    
+    if (!githubSuccess) {
+        // 로컬에서 API 키 로드 시도
+        const localSuccess = apiConfig.loadAPIKeyFromLocal();
+        
+        if (!localSuccess) {
+            // API 키 설정 모달 표시
+            showAPIKeyModal();
+        }
     }
     
-    // 아직 보지 않은 명언들 필터링
-    const availableQuotes = quotes.filter((_, index) => !usedQuotes.includes(index));
-    
-    // 랜덤 선택
-    const randomIndex = Math.floor(Math.random() * availableQuotes.length);
-    const selectedQuote = availableQuotes[randomIndex];
-    
-    // 사용된 명언 인덱스 추가
-    const originalIndex = quotes.indexOf(selectedQuote);
-    usedQuotes.push(originalIndex);
-    
-    currentQuote = { ...selectedQuote, index: originalIndex };
-    
-    // 애니메이션과 함께 표시
-    displayQuoteWithAnimation(selectedQuote);
-    
-    // 통계 업데이트
-    totalQuotesViewed++;
-    updateStats();
-    
-    // 버튼 활성화
-    document.getElementById('favoriteBtn').disabled = false;
-    document.getElementById('shareBtn').disabled = false;
-    
-    // 즐겨찾기 버튼 상태 업데이트
-    updateFavoriteButton();
+    updateAPIStatus();
+}
+
+// 랜덤 명언 생성 (개선된 버전)
+async function generateQuote() {
+    if (quoteGenerator.isLoading) return;
+
+    try {
+        let selectedQuote;
+        
+        // API 키가 있으면 ChatGPT에서 생성, 없으면 백업 사용
+        if (apiConfig.isAPIKeyValid()) {
+            try {
+                selectedQuote = await quoteGenerator.generateQuoteFromAPI();
+                showNotification('ChatGPT에서 새로운 명언을 생성했습니다! ✨');
+            } catch (error) {
+                console.error('API 호출 실패, 백업 명언 사용:', error);
+                selectedQuote = quoteGenerator.getFallbackQuote();
+                showNotification('백업 명언을 표시합니다. API 키를 확인해주세요.');
+            }
+        } else {
+            // 백업 명언 사용
+            selectedQuote = quoteGenerator.getFallbackQuote();
+        }
+        
+        currentQuote = { ...selectedQuote, index: Date.now() }; // 고유 ID 생성
+        
+        // 애니메이션과 함께 표시
+        displayQuoteWithAnimation(selectedQuote);
+        
+        // 통계 업데이트
+        totalQuotesViewed++;
+        updateStats();
+        
+        // 버튼 활성화
+        document.getElementById('favoriteBtn').disabled = false;
+        document.getElementById('shareBtn').disabled = false;
+        
+        // 즐겨찾기 버튼 상태 업데이트
+        updateFavoriteButton();
+        
+    } catch (error) {
+        console.error('명언 생성 오류:', error);
+        showNotification('명언 생성 중 오류가 발생했습니다.');
+    }
 }
 
 // 애니메이션과 함께 명언 표시
@@ -268,6 +332,89 @@ function showNotification(message) {
     }, 3000);
 }
 
+// 로딩 상태 업데이트
+function updateLoadingState(isLoading) {
+    const generateBtn = document.getElementById('generateBtn');
+    
+    if (isLoading) {
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<span class="btn-icon">⏳</span>생성 중...';
+        generateBtn.classList.add('loading');
+    } else {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<span class="btn-icon">🎲</span>새로운 명언';
+        generateBtn.classList.remove('loading');
+    }
+}
+
+// API 상태 업데이트
+function updateAPIStatus() {
+    const statusElement = document.getElementById('apiStatus');
+    if (!statusElement) return;
+    
+    if (apiConfig.isAPIKeyValid()) {
+        statusElement.textContent = '✅ ChatGPT API 연결됨';
+        statusElement.className = 'api-status connected';
+    } else {
+        statusElement.textContent = '⚠️ API 키 필요 (백업 명언 사용중)';
+        statusElement.className = 'api-status disconnected';
+    }
+}
+
+// API 키 설정 모달 표시
+function showAPIKeyModal() {
+    const modal = document.createElement('div');
+    modal.className = 'api-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>🔑 OpenAI API 키 설정</h3>
+            <p>ChatGPT에서 명언을 생성하려면 API 키가 필요합니다.</p>
+            <div class="api-input-group">
+                <input type="password" id="apiKeyInput" placeholder="sk-..." />
+                <button onclick="setAPIKeyFromInput()">설정</button>
+            </div>
+            <div class="api-help">
+                <p><strong>API 키 획득 방법:</strong></p>
+                <ol>
+                    <li><a href="https://platform.openai.com/api-keys" target="_blank">OpenAI API 키 페이지</a> 방문</li>
+                    <li>"Create new secret key" 클릭</li>
+                    <li>생성된 키를 복사하여 위에 입력</li>
+                </ol>
+                <p><strong>GitHub에서 키 관리:</strong></p>
+                <p>보안을 위해 GitHub 저장소에 <code>api-key.txt</code> 파일을 생성하고 API 키를 저장하세요.</p>
+            </div>
+            <button class="close-modal" onclick="closeAPIKeyModal()">나중에 설정</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('show'), 100);
+}
+
+// API 키 입력에서 설정
+function setAPIKeyFromInput() {
+    const input = document.getElementById('apiKeyInput');
+    const apiKey = input.value.trim();
+    
+    if (apiKey.startsWith('sk-') && apiKey.length > 20) {
+        apiConfig.setAPIKey(apiKey);
+        updateAPIStatus();
+        closeAPIKeyModal();
+        showNotification('API 키가 설정되었습니다! 🎉');
+    } else {
+        showNotification('유효하지 않은 API 키입니다. sk-로 시작하는 키를 입력해주세요.');
+    }
+}
+
+// API 키 모달 닫기
+function closeAPIKeyModal() {
+    const modal = document.querySelector('.api-modal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
 // 키보드 단축키
 document.addEventListener('keydown', function(e) {
     if (e.code === 'Space') {
@@ -279,5 +426,8 @@ document.addEventListener('keydown', function(e) {
     } else if (e.code === 'KeyS' && currentQuote) {
         e.preventDefault();
         shareQuote();
+    } else if (e.code === 'KeyK' && e.ctrlKey) {
+        e.preventDefault();
+        showAPIKeyModal();
     }
 });
